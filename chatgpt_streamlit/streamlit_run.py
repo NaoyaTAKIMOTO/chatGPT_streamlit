@@ -1,16 +1,36 @@
 import streamlit as st
 from streamlit_chat import message
 from langchain.llms import OpenAIChat
-from langchain import PromptTemplate, LLMChain
+from langchain import PromptTemplate, LLMChain, SerpAPIWrapper
+from langchain.agents import ZeroShotAgent, Tool, AgentExecutor
+
 # chatGPT
-template = """Question: {question}
-
-Answer: Let's think step by step in Japanese.
-Final answer is given in Japanese simply."""
-
-prompt = PromptTemplate(template=template, input_variables=["question"])
 llm = OpenAIChat()
-llm_chain = LLMChain(prompt=prompt, llm=llm)
+search = SerpAPIWrapper()
+tools = [
+    Tool(
+        name = "Search",
+        func=search.run,
+        description="useful for when you need to answer questions about current events"
+    )
+]
+prefix = """Answer the following questions as best you can, but speaking as a pirate might speak. You have access to the following tools:"""
+suffix = """Begin! Remember to speak as a pirate when giving your final answer. Use lots of "Args"
+
+Question: {input}
+{agent_scratchpad}"""
+
+prompt = ZeroShotAgent.create_prompt(
+    tools, 
+    prefix=prefix, 
+    suffix=suffix, 
+    input_variables=["input", "agent_scratchpad"]
+)
+llm_chain = LLMChain(llm=llm, prompt=prompt)
+agent = ZeroShotAgent(llm_chain=llm_chain, tools=tools)
+agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=tools, verbose=True)
+
+
 
 ##
 st.markdown("""
@@ -35,7 +55,7 @@ placeholder = st.empty() # placeholder for latest message
 input_ = st.text_input("you:")
 st.session_state.message_history.append("you:"+input_)
 if len(input_) > 0:
-    input2_ = llm_chain.run(input_)
+    input2_ = agent_executor.run(input_)
     st.session_state.message_history.append("AI:"+input2_)
 
 with placeholder.container():
