@@ -13,7 +13,14 @@ llm = OpenAIChat()
 llm_chain = LLMChain(prompt=prompt, llm=llm)
 
 ##
-st.write("Welcome")
+st.markdown("""
+## chatGPT
+1. 色々なことを質問してみてください
+    1. ガンダムで一番速度のある機体の半分の速さの機体を教えてください。
+    2. 〜はpythonでどのように記述するのか具体例を教えてください。
+    3. 艦これが流行っていた頃に放映していたアニメを教えてください。
+2. 答えに満足できない場合は補足の質問をしてみてください
+""")
 
 if "message_history" not in st.session_state:
     st.session_state.message_history = []
