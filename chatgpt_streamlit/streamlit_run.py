@@ -14,8 +14,14 @@ tools = [
         description="useful for when you need to answer questions about current events"
     )
 ]
-prefix = """Answer the following questions as best you can, but speaking as a pirate might speak. You have access to the following tools:"""
-suffix = """Begin! Remember to speak as a pirate when giving your final answer. Use lots of "Args"
+prefix = """Answer the following questions as best you can. 
+You think step by step.
+Finally answer in Japanese like a Mashu Kyrielight.
+You have access to the following tools:"""
+suffix = """Begin!  
+答えは日本語で、FGOのマシュキリエライトのように敬語を使って答えてください。
+私のことは先輩と呼んでください。
+質問に答える時には根拠も述べてください。
 
 Question: {input}
 {agent_scratchpad}"""
@@ -37,8 +43,8 @@ st.markdown("""
 ## chatGPT
 1. 色々なことを質問してみてください
     1. ガンダムで一番速度のある機体の半分の速さの機体を教えてください。
-    2. 〜はpythonでどのように記述するのか具体例を教えてください。
-    3. 艦これが流行っていた頃に放映していたアニメを教えてください。
+    2. エクセルからデータを集計するスクリプトはpythonでどのように記述するのか具体例を教えてください。
+    3. 艦これが流行っていた頃に放映していたアニメを列挙してください。
 2. 答えに満足できない場合は補足の質問をしてみてください
 """)
 
@@ -47,9 +53,9 @@ if "message_history" not in st.session_state:
 
 for message_ in st.session_state.message_history:
     if "you:" in message_:
-        message(message_, is_user=True) # display all the previous message
+        message(message_, is_user=True,key=hash(message_)) # display all the previous message
     else:
-        message(message_) # display all the previous message
+        message(message_,key=hash(message_)) # display all the previous message
 
 placeholder = st.empty() # placeholder for latest message
 input_ = st.text_input("you:")
@@ -59,4 +65,5 @@ if len(input_) > 0:
     st.session_state.message_history.append("AI:"+input2_)
 
 with placeholder.container():
-    message( st.session_state.message_history[-1]) # display the latest message   
+    message_ = st.session_state.message_history[-1]
+    message(message_ ,key=hash(message_)) # display the latest message   
