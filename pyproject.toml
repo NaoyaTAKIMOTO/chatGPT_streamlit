@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "chatgpt-streamlit"
+version = "0.1.0"
+description = ""
+authors = ["Naoya TAKIMOTO <ibanstraght@gmail.com>"]
+readme = "README.md"
+packages = [{include = "chatgpt_streamlit"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+langchain = "^0.0.101"
+streamlit = "^1.19.0"
+openai = "^0.27.0"
+jupyter = "^1.0.0"
+streamlit-chat = "^0.0.2.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
