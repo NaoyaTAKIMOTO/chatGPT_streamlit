@@ -1,27 +1,39 @@
 import streamlit as st
 from streamlit_chat import message
 from langchain.llms import OpenAIChat
-from langchain import PromptTemplate, LLMChain, SerpAPIWrapper
+from langchain import PromptTemplate, LLMChain, SerpAPIWrapper, Wikipedia
 from langchain.agents import ZeroShotAgent, Tool, AgentExecutor
+from langchain.utilities import GoogleSearchAPIWrapper
+from langchain.agents.react.base import DocstoreExplorer
+import datetime
+
+docstore=DocstoreExplorer(Wikipedia())
 
 # chatGPT
-llm = OpenAIChat()
-search = SerpAPIWrapper()
+llm = OpenAIChat(temperature=0.5)
+#search = SerpAPIWrapper()
+search = GoogleSearchAPIWrapper()
 tools = [
     Tool(
-        name = "Search",
+        name = "Search Google",
         func=search.run,
         description="useful for when you need to answer questions about current events"
-    )
+    ),
+    Tool(
+        name="Search Wikipedia",
+        func=docstore.search,
+        description="useful for when you need to answer questions about historical events"
+
+    ),
 ]
 prefix = """Answer the following questions as best you can. 
-You think step by step.
-Finally answer in Japanese like a Mashu Kyrielight.
+You think step by step in English.
+Finally answer in Japanese.
 You have access to the following tools:"""
 suffix = """Begin!  
-答えは日本語で、FGOのマシュキリエライトのように敬語を使って答えてください。
-私のことは先輩と呼んでください。
+最終的な答えは日本語で答えてください。
 質問に答える時には根拠も述べてください。
+不足する情報がある場合は質問してください。
 
 Question: {input}
 {agent_scratchpad}"""
@@ -53,12 +65,12 @@ if "message_history" not in st.session_state:
 
 for message_ in st.session_state.message_history:
     if "you:" in message_:
-        message(message_, is_user=True,key=hash(message_)) # display all the previous message
+        message(message_, is_user=True,key=hash(message_+str(datetime.datetime.today()))) # display all the previous message
     else:
-        message(message_,key=hash(message_)) # display all the previous message
+        message(message_,key=hash(message_+str(datetime.datetime.today()))) # display all the previous message
 
 placeholder = st.empty() # placeholder for latest message
-input_ = st.text_input("you:")
+input_ = st.text_area("you:")
 st.session_state.message_history.append("you:"+input_)
 if len(input_) > 0:
     input2_ = agent_executor.run(input_)
@@ -66,4 +78,4 @@ if len(input_) > 0:
 
 with placeholder.container():
     message_ = st.session_state.message_history[-1]
-    message(message_ ,key=hash(message_)) # display the latest message   
+    message(message_ ,key=hash(message_+str(datetime.datetime.today()))) # display the latest message   
